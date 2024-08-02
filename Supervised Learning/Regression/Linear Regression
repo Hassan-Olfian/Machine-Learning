@@ -1,0 +1,112 @@
+# A linear regression algorithm is used to predict house prices.
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# format plot styles and numbers
+plt.style.use('ggplot')
+np.set_printoptions(precision=2, threshold=10)
+
+# read dataset
+data = np.genfromtxt('house_price.txt' , delimiter= ',')
+print(data)
+
+# inputs and outputs
+X = data [:,0]
+print(X.shape)
+y = data [:,1]
+print(y.shape)
+
+plt.Figure(figsize= (10,6))
+plt.scatter(X, y,s=30, c='r' ,marker='x')
+plt.xlabel('Size (Sq. feet)')
+plt.ylabel('Price (x100 $)')
+plt.title('House Dataset')
+plt.show;
+
+theta = np.array([[500.], [0.5]]) # h(x) = 500 + 0.5x
+
+x = np.arange(500, 3000, 100)
+print(x)
+print(x.shape)
+
+x = x[:, None] # from 1d to 2d
+x.shape
+print(x)
+
+x = np.concatenate((np.ones_like(x), x), axis = 1) # horizontal concatenation 
+print(x)
+
+h = x @ theta
+print(h)
+
+plt.Figure(figsize= (10,6))
+plt.scatter(X, y,s=30, c='r' ,marker='x')
+plt.plot(x, h, c='k')
+plt.xlabel('Size (Sq. feet)')
+plt.ylabel('Price (x100 $)')
+plt.title('House Dataset')
+plt.xlim(500, 3000)
+plt.ylim(300, 5200)
+plt.show;
+
+# Gradient Descent
+def h(theta_0, theta_1, x):
+    return theta_0 + theta_1 * x
+
+def mse(y_pred, y_true):
+    return 0.5 * ((y_pred - y_true) ** 2).mean()
+
+x, y = data[:, 0], data[:,1]
+
+# Normalization
+mu = x.mean()
+sigma = x.std()            # the standard deviation
+xn = (x - mu)/ sigma       # normalization
+print(xn)
+
+# Learning rate
+alpha = 5e-3
+
+# initialize parameter randomely
+theta_0 = np.random.randn()
+theta_1 = np.random.randn()
+
+print("Initial guess:")
+print(" theta_0 = %.4f\n theta_1 = %.4f" %(theta_0, theta_1))
+
+costs = []
+
+def update_step():
+    global theta_0, theta_1, costs
+
+    # predict
+    y_pred = h(theta_0, theta_1, xn)
+    costs.append(mse(y_pred, y))
+
+    # compute gradients
+    dtheta_0 = (y_pred - y)
+    dtheta_1 = xn * dtheta_0
+
+    # update parameters
+    theta_0 -= alpha * dtheta_0.mean()
+    theta_1 -= alpha * dtheta_1.mean()
+
+# Iteration
+for i in range(2000): 
+    update_step()  
+
+print(" theta_0 %7.2f\n theta_1.%7.2f" %(theta_0, theta_1))
+
+# Costs
+plt.figure(figsize=(12, 6)) 
+plt.plot(costs)
+plt.xlabel('Iteration')
+plt.ylabel('Cost')
+plt.show()
+
+# Prediction
+x_test = 1750
+x_test_n = (x_test - mu)/ sigma
+y_test = h(theta_0, theta_1, x_test_n)
+print("For size = {}, predicted price = {:.2f} $".format(x_test, y_test))
